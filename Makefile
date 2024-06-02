@@ -29,4 +29,4 @@ test: $(ZIG_SRCS)
 
 clean:
 	rm -f *.o *.a main
-	rm -rf zig-out zig-cache
+	rm -rf zig-out .zig-cache

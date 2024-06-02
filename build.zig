@@ -8,7 +8,7 @@ pub fn build(b: *Build) void {
     const lib = b.addStaticLibrary(
         .{
             .name = "add",
-            .root_source_file = .{ .path = "src/main.zig" },
+            .root_source_file = b.path("src/main.zig"),
             .target = target,
             .optimize = optimize,
         },
@@ -23,7 +23,7 @@ pub fn build(b: *Build) void {
     lib.pie = true;
 
     const main_tests = b.addTest(.{
-        .root_source_file = .{ .path = "src/main.zig" },
+        .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
