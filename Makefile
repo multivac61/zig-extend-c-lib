@@ -1,8 +1,7 @@
-# Makefile
-CC=gcc
+
 CFLAGS=-Wall -Werror -Wextra -Os -fPIE
-LD=ld
-LDFLAGS=-melf_x86_64 -r --whole-archive
+AR=ar
+ARFLAGS=rcs
 ZIGOUT=zig-out/lib
 LPATH=-L.
 ZIG_SRCS=$(wildcard src/*.zig)
@@ -19,7 +18,8 @@ $(ZIGOUT)/libadd.a: $(ZIG_SRCS)
 	zig build
 
 libi32math.a: $(ZIGOUT)/libadd.a mul.o
-	$(LD) $(LDFLAGS) $(LPATH) -o $@ $^
+	cp $(ZIGOUT)/libadd.a ./libi32math.a
+	$(AR) $(ARFLAGS) libi32math.a mul.o
 
 main: main.o libi32math.a
 	$(CC) -o main $(CFLAGS) $(LPATH) $< -li32math
@@ -30,3 +30,5 @@ test: $(ZIG_SRCS)
 clean:
 	rm -f *.o *.a main
 	rm -rf zig-out .zig-cache
+
+

@@ -3,3 +3,4 @@ main
 *.o
 .zig-cache
 zig-out
+.devenv
