@@ -2,23 +2,12 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     systems.url = "github:nix-systems/default";
-    devenv.url = "github:cachix/devenv";
-    devenv.inputs.nixpkgs.follows = "nixpkgs";
     flake-parts.url = "github:hercules-ci/flake-parts";
-  };
-
-  nixConfig = {
-    extra-trusted-public-keys = "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=";
-    extra-substituters = "https://devenv.cachix.org";
   };
 
   outputs =
     inputs@{ flake-parts, ... }:
-    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
-      imports = [
-        inputs.devenv.flakeModule
-      ];
-
+    flake-parts.lib.mkFlake { inherit inputs; } {
       systems = import inputs.systems;
 
       perSystem =
@@ -31,14 +20,13 @@
         }:
         {
           packages = {
-            devenv-up = config.devenv.shells.default.config.procfileScript;
-
             i32math = pkgs.stdenv.mkDerivation (finalAttrs: {
               pname = "i32math";
               version = "0.1.0";
               src = ./.;
 
               nativeBuildInputs = [
+                pkgs.gnumake
                 (pkgs.zig_0_13.hook.overrideAttrs {
                   zig_default_flags = "-Doptimize=ReleaseFast --color off";
                 })
@@ -64,13 +52,27 @@
             default = config.packages.i32math;
           };
 
-          devenv.shells.default = {
-            packages = with pkgs; [ git ] ++ lib.optionals stdenv.isLinux [ inotify-tools ];
+          devShells.default = pkgs.mkShell {
+            inputsFrom = [ self'.packages.i32math ];
+            packages =
+              with pkgs;
+              [
+                git
+                zig_0_13
+                zls
+              ]
+              ++ lib.optionals stdenv.isLinux [ inotify-tools ];
 
-            languages = {
-              zig.enable = true;
-              c.enable = true;
-            };
+            shellHook = ''
+              echo "Welcome to i32math development environment!"
+            '';
+          };
+          checks = {
+            # Check that the main package builds
+            inherit (self'.packages) i32math;
+
+            # Check that the development shell builds
+            devShell = self'.devShells.default;
           };
         };
     };
