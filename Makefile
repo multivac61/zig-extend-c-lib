@@ -14,7 +14,6 @@ default: main
 	$(CC) -o $@ -c $(CFLAGS) $^
 
 $(ZIGOUT)/libadd.a: $(ZIG_SRCS)
-	zig fmt build.zig src/*.zig
 	zig build
 
 libi32math.a: $(ZIGOUT)/libadd.a mul.o
@@ -30,5 +29,3 @@ test: $(ZIG_SRCS)
 clean:
 	rm -f *.o *.a main
 	rm -rf zig-out .zig-cache
-
-
