@@ -12,7 +12,6 @@
 
       perSystem =
         {
-          config,
           self',
           pkgs,
           system,
@@ -20,7 +19,7 @@
         }:
         {
           packages = {
-            i32math = pkgs.stdenv.mkDerivation (finalAttrs: {
+            i32math = pkgs.stdenv.mkDerivation {
               pname = "i32math";
               version = "0.1.0";
               src = ./.;
@@ -36,6 +35,9 @@
 
               buildPhase = ''make ZIGOUT=zig-out/lib'';
 
+              checkPhase = "make test";
+              doCheck = true;
+
               installPhase = ''
                 mkdir -p $out/{lib,bin}
                 cp libi32math.a $out/lib/
@@ -47,33 +49,14 @@
                 license = licenses.mit;
                 platforms = platforms.all;
               };
-            });
+            };
 
-            default = config.packages.i32math;
+            default = self'.packages.i32math;
           };
 
-          devShells.default = pkgs.mkShell {
-            inputsFrom = [ self'.packages.i32math ];
-            packages =
-              with pkgs;
-              [
-                git
-                zig_0_13
-                zls
-              ]
-              ++ lib.optionals stdenv.isLinux [ inotify-tools ];
+          devShells.default = pkgs.mkShell { inputsFrom = [ self'.packages.i32math ]; };
 
-            shellHook = ''
-              echo "Welcome to i32math development environment!"
-            '';
-          };
-          checks = {
-            # Check that the main package builds
-            inherit (self'.packages) i32math;
-
-            # Check that the development shell builds
-            devShell = self'.devShells.default;
-          };
+          checks = self'.packages // self'.devShells;
         };
     };
 }

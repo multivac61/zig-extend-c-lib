@@ -24,7 +24,7 @@ main: main.o libi32math.a
 	$(CC) -o main $(CFLAGS) $(LPATH) $< -li32math
 
 test: $(ZIG_SRCS)
-	zig build test
+	zig build test --summary all
 
 clean:
 	rm -f *.o *.a main
